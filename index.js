@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const mongoose = require('mongoose');
 const exphbs = require('express-handlebars');
 const homeRoutes = require('./routes/home');
 const cardRoutes = require('./routes/card');
@@ -18,7 +19,9 @@ app.set('view engine', 'hbs');
 app.set('views', 'views');
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({
+    extended: true
+}));
 
 app.use('/', homeRoutes);
 app.use('/add', addRoutes);
@@ -27,6 +30,18 @@ app.use('/card', cardRoutes);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`Server is runing on port ${PORT}`);
-});
+async function start() {
+    try {
+        const url = `mongodb+srv://necktra:HewRcHsLO5yLxsoc@cluster0.s2jrt.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+        await mongoose.connect(url, {
+            useNewUrlParser: true
+        });
+        app.listen(PORT, () => {
+            console.log(`Server is runing on port ${PORT}`);
+        });
+    } catch (e) {
+        console.log(e)
+    }
+};
+
+start();
