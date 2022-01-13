@@ -5,7 +5,7 @@ const Course = require('../models/course');
 const router = Router();
 
 router.get('/', async (req, res) => {
-    const courses = await Course.find().lean();
+    const courses = await Course.find().lean().populate('userId', 'email name').select('price title img');
     res.render('courses', {
         title: 'Курсы',
         isCourses: true,
@@ -43,7 +43,6 @@ router.post('/remove', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-    console.log(req.params.id);
     const course = await Course.findById(req.params.id).lean();
     res.render('course', {
         layout: 'empty',
