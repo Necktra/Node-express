@@ -34,7 +34,7 @@ async function start() {
     try {
         const url = `mongodb+srv://necktra:HewRcHsLO5yLxsoc@cluster0.s2jrt.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
         await mongoose.connect(url, {
-            useNewUrlParser: true
+            useNewUrlParser: true,
         });
         app.listen(PORT, () => {
             console.log(`Server is runing on port ${PORT}`);
