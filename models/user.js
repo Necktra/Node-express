@@ -49,7 +49,7 @@ userSchema.methods.addToCart = function (course) {
     return this.save();
 };
 
-userSchema.methods.removeFromCart = function (id) {
+userSchema.methods.removeFromCart = function(id) {
     let items = [...this.cart.items];
     const idx = items.findIndex(c => c.courseId.toString() === id.toString());
 
@@ -62,6 +62,11 @@ userSchema.methods.removeFromCart = function (id) {
     this.cart = {
         items
     };
+    return this.save();
+}
+
+userSchema.methods.clearCart = function() {
+    this.cart = {items: []};
     return this.save();
 }
 
