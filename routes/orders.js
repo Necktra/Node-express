@@ -6,13 +6,12 @@ const router = Router();
 
 router.get('/', async (req, res) => {
     try {
-        const orders = await Order.find({'user.userId': req.user._id}).populate('user.userId');
-
+        const orders = await Order.find({'user.userId': req.user._id}).lean().populate('user.userId');
         res.render('orders', {
-            title: 'Заказы',
             isOrder: true,
+            title: 'Заказы',
             orders: orders.map(o => ({
-                ...o._doc, 
+                ...o, 
                 price: o.courses.reduce((total, c) => {
                     return total += c.count * c.course.price
                 }, 0)
