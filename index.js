@@ -3,6 +3,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const exphbs = require('express-handlebars');
 const session = require('express-session');
+const MongoStore = require('connect-mongodb-session')(session);
 const homeRoutes = require('./routes/home');
 const cardRoutes = require('./routes/card');
 const addRoutes = require('./routes/add');
@@ -12,11 +13,17 @@ const authRoutes = require('./routes/auth');
 const User = require('./models/user');
 const varMiddleware = require('./middleware/variables');
 
+const MONGODB_URI = `mongodb+srv://necktra:HewRcHsLO5yLxsoc@cluster0.s2jrt.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const app = express();
 
 const hbs = exphbs.create({
     defaultLayout: 'main',
     extname: 'hbs'
+});
+
+const store = new MongoStore({
+    collection: 'sessions',
+    uri: MONGODB_URI
 });
 
 app.engine('hbs', hbs.engine);
@@ -30,7 +37,8 @@ app.use(express.urlencoded({
 app.use(session({
     secret: 'some secret value',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store
 }));
 app.use(varMiddleware);
 
@@ -45,22 +53,9 @@ const PORT = process.env.PORT || 3000;
 
 async function start() {
     try {
-        const url = `mongodb+srv://necktra:HewRcHsLO5yLxsoc@cluster0.s2jrt.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-        await mongoose.connect(url, {
+        await mongoose.connect(MONGODB_URI, {
             useNewUrlParser: true,
         });
-
-        // const candidate = await User.findOne();
-        // if (!candidate) {
-        //     const user = new User({
-        //         email: 'hallo.ween@mail.ru',
-        //         name: 'Ira',
-        //         cart: {
-        //             items: []
-        //         }
-        //     });
-        //     await user.save();
-        // }
 
         app.listen(PORT, () => {
             console.log(`Server is runing on port ${PORT}`);
