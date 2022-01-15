@@ -36,7 +36,7 @@ router.post('/edit', auth, async (req, res) => {
 
 router.post('/remove', auth, async (req, res) => {
     try {
-        await Course.deleteOne({_id: req.body._id}).lean();
+        await Course.deleteOne({_id: req.body.id}).lean();
         res.redirect('/courses');
     } catch (e) {
         console.log(e);
