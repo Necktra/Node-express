@@ -1,0 +1,17 @@
+const keys = require('../keys');
+
+module.exports = function (email) {
+    return {
+        from: keys.EMAIL_FROM,
+        //to: 'hallo.ween@mail.ru',
+        to: email,
+        subject: 'Аккаунт создан',
+        // text: 'Ntst mail from app',
+        html: `
+        <h1>Добро пожалвать в наш магазин!</h1>
+        <p>Вы успешно создали аккаунт с email - ${email}</p>
+        <hr/>
+        <a href="${keys.BASE_URL}">Магазин курсов</a>
+        `
+    }
+}
