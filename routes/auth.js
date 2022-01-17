@@ -2,12 +2,14 @@ const {
     Router
 } = require('express');
 const bcrypt = require('bcryptjs');
+const {validationResult} = require('express-validator/check');
 const crypto = require('crypto');
 const User = require('../models/user');
 const nodemailer = require('nodemailer');
 const regEmail = require('../emails/registration');
 const resetEmail = require('../emails/reset');
 const router = Router();
+const {registerValidators} = require('../utils/validators');
 const keys = require('../keys');
 
 let transporter = nodemailer.createTransport({
@@ -69,17 +71,24 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.post('/register', async (req, res) => {
+router.post('/register', registerValidators, async (req, res) => {
     try {
         const {
             email,
             password,
-            repeat,
+            confirm,
             name
         } = req.body;
         const candidate = await User.findOne({
             email
         }).lean();
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            req.flash('registerError', errors.array()[0].msg);
+            return res.status(422).redirect('/auth/login#register');
+        }
+
         if (candidate) {
             req.flash('registerError', 'Пользователь с таким email уже существует');
             res.redirect('/auth/login#register');
