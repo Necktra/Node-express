@@ -2,14 +2,18 @@ const {
     Router
 } = require('express');
 const bcrypt = require('bcryptjs');
-const {validationResult} = require('express-validator/check');
+const {
+    validationResult
+} = require('express-validator/check');
 const crypto = require('crypto');
 const User = require('../models/user');
 const nodemailer = require('nodemailer');
 const regEmail = require('../emails/registration');
 const resetEmail = require('../emails/reset');
 const router = Router();
-const {registerValidators} = require('../utils/validators');
+const {
+    registerValidators
+} = require('../utils/validators');
 const keys = require('../keys');
 
 let transporter = nodemailer.createTransport({
@@ -76,12 +80,8 @@ router.post('/register', registerValidators, async (req, res) => {
         const {
             email,
             password,
-            confirm,
             name
         } = req.body;
-        const candidate = await User.findOne({
-            email
-        }).lean();
 
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -89,25 +89,21 @@ router.post('/register', registerValidators, async (req, res) => {
             return res.status(422).redirect('/auth/login#register');
         }
 
-        if (candidate) {
-            req.flash('registerError', 'Пользователь с таким email уже существует');
-            res.redirect('/auth/login#register');
-        } else {
-            const hashPassword = await bcrypt.hash(password, 10);
-            const user = new User({
-                email,
-                name,
-                password: hashPassword,
-                cart: {
-                    items: []
-                }
-            });
-            await user.save();
+        const hashPassword = await bcrypt.hash(password, 10);
+        const user = new User({
+            email,
+            name,
+            password: hashPassword,
+            cart: {
+                items: []
+            }
+        });
+        await user.save();
 
-            await transporter.sendMail(regEmail(email));
+        res.redirect('/auth/login#login');
 
-            res.redirect('/auth/login#login');
-        }
+        await transporter.sendMail(regEmail(email));
+
     } catch (e) {
         console.log(e);
     }
@@ -167,7 +163,7 @@ router.post('/reset', (req, res) => {
                 candidate.resetToken = token;
                 candidate.resetTokenExp = Date.now() + 60 * 60 * 1000;
                 await candidate.save();
-                res.redirect('/auth/login');                
+                res.redirect('/auth/login');
                 await transporter.sendMail(resetEmail(candidate.email, token));
             } else {
                 req.flash('error', 'Такого email нет');
