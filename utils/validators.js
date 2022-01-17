@@ -17,11 +17,11 @@ exports.registerValidators = [
         } catch {
             console.log(e);
         }
-    }),
+    }).normalizeEmail(),
     body('password', 'Пароль должен быть минимум 6 символов').isLength({
         min: 6,
         max: 56
-    }).isAlphanumeric(),
+    }).isAlphanumeric().trim(),
     body('confirm').custom((value, {
         req
     }) => {
@@ -29,8 +29,8 @@ exports.registerValidators = [
             throw new Error('Пароли должны совпадать')
         }
         return true;
-    }),
+    }).trim(),
     body('name').isLength({
         min: 3
-    }).withMessage('Имя должно быть минимум 3 символа'),
+    }).withMessage('Имя должно быть минимум 3 символа').trim(),
 ];
