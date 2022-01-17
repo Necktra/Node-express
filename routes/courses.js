@@ -1,8 +1,14 @@
 const {
     Router
 } = require('express');
+const {
+    validationResult
+} = require('express-validator/check');
 const Course = require('../models/course');
 const auth = require('../middleware/auth');
+const {
+    courseValidators
+} = require('../utils/validators');
 const router = Router();
 
 function isOwner(course, req) {
@@ -37,6 +43,7 @@ router.get('/:id/edit', auth, async (req, res) => {
 
         res.render('course-edit', {
             title: `Редактировать ${course.title}`,
+            coursesError: req.flash('coursesError'),
             course
         });
     } catch (e) {
@@ -45,19 +52,28 @@ router.get('/:id/edit', auth, async (req, res) => {
 
 });
 
-router.post('/edit', auth, async (req, res) => {
+router.post('/edit', auth, courseValidators, async (req, res) => {
+    const errors = validationResult(req);
+    const {
+        id
+    } = req.body;
+
+    if (!errors.isEmpty()) {
+        req.flash('coursesError', errors.array()[0].msg);
+        return res.status(422).redirect(`/courses/${id}/edit?allow=true`);
+    }
+
     try {
-        const {
-            id
-        } = req.body;
+
         delete req.body.id;
         const course = await Course.findById(id);
         if (!isOwner(course, req)) {
             res.redirect('/courses');
         }
+
         Object.assign(course, req.body);
         await course.save();
-        // await Course.findByIdAndUpdate(id, req.body).lean();
+
         res.redirect('/courses');
     } catch (e) {
         console.log(e);

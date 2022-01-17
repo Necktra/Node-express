@@ -12,7 +12,8 @@ const regEmail = require('../emails/registration');
 const resetEmail = require('../emails/reset');
 const router = Router();
 const {
-    registerValidators
+    registerValidators,
+    authValidators
 } = require('../utils/validators');
 const keys = require('../keys');
 
@@ -41,12 +42,19 @@ router.get('/logout', async (req, res) => {
     });
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', authValidators, async (req, res) => {
     try {
         const {
             email,
             password
         } = req.body;
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            req.flash('loginError', errors.array()[0].msg);
+            return res.status(422).redirect('/auth/login#login');
+        }
+
         const candidate = await User.findOne({
             email
         });
